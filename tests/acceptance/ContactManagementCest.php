@@ -428,15 +428,24 @@ class ContactManagementCest
         $contact->selectContactFromList(1);
         $contact->selectContactFromList(2);
 
+        $I->wait(1);
+
         // Select change segment option from dropdown for multiple selections
         $contact->selectOptionFromDropDownForMultipleSelections(10);
 
-        $I->waitForElementClickable(ContactPage::$doNotContactSaveButton, 5);
+        $I->waitForElementClickable(ContactPage::$doNotContactSaveButton, 10);
         $I->click(ContactPage::$doNotContactSaveButton);
+
+        $I->wait(1);
 
         $I->reloadPage();
 
+        $I->wait(5);
+
+        $I->waitForElementVisible(ContactPage::$firstContactDoNotContact, 10);
         $I->seeElement(ContactPage::$firstContactDoNotContact);
+
+        $I->waitForElementVisible(ContactPage::$secondContactDoNotContact, 10);
         $I->seeElement(ContactPage::$secondContactDoNotContact);
     }
 

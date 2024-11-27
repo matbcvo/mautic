@@ -44,11 +44,15 @@ class AcceptanceTester extends Codeception\Actor
         $this->amOnPage(CategoriesPage::$URL);
         $this->waitForElementClickable(CategoriesPage::$NEW_BUTTON);
         $this->click(CategoriesPage::$NEW_BUTTON);
+        $this->wait(2);
         $this->waitForElementClickable(CategoriesPage::$BUNDLE_DROPDOWN);
         $this->click(CategoriesPage::$BUNDLE_DROPDOWN);
+        $this->wait(2);
         $this->waitForElementClickable(CategoriesPage::$BUNDLE_EMAIL_OPTION);
         $this->click(CategoriesPage::$BUNDLE_EMAIL_OPTION);
+        $this->wait(2);
         $this->fillField(CategoriesPage::$TITLE_FIELD, $name);
         $this->click(CategoriesPage::$SAVE_AND_CLOSE);
+        $this->wait(2);
     }
 }

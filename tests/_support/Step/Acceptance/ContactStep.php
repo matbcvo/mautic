@@ -65,8 +65,10 @@ class ContactStep extends \AcceptanceTester
      */
     public function selectContactFromList($place): void
     {
-        $I = $this;
-        $I->checkOption("//*[@id='leadTable']/tbody/tr[$place]/td[1]/div/span/input");
+        $I     = $this;
+        $xpath = "//*[@id='leadTable']/tbody/tr[$place]/td[1]/div/span/input";
+        $I->checkOption($xpath);
+        $I->seeCheckboxIsChecked($xpath);
     }
 
     /**
