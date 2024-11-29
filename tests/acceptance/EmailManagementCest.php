@@ -39,8 +39,6 @@ class EmailManagementCest
 
         $I->reloadPage();
 
-        $I->wait(5); // Wait for the page to load
-
         // Assert
         $this->verifyAllEmailsBelongTo($I, $newCategoryName);
     }
@@ -71,9 +69,12 @@ class EmailManagementCest
 
     protected function verifyAllEmailsBelongTo(AcceptanceTester $I, string $firstCategoryName): void
     {
+        $I->waitForElementVisible('span.label-category');
         $categories = $I->grabMultiple('span.label-category');
         for ($i = 1; $i <= count($categories); ++$i) {
-            $I->see($firstCategoryName, '//*[@id="app-content"]/div/div[2]/div[2]/div[1]/table/tbody/tr['.$i.']/td[3]/div');
+            $xpath = '//*[@id="app-content"]/div/div[2]/div[2]/div[1]/table/tbody/tr['.$i.']/td[3]/div';
+            $I->waitForElementVisible($xpath);
+            $I->see($firstCategoryName, $xpath);
         }
     }
 }
