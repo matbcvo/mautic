@@ -35,19 +35,27 @@ class EmailManagementCest
         $this->selectChangeCategoryAction($I);
         $newCategoryName = $email->changeEmailCategory();
 
-        $I->reloadPage();
+        $this->ensureNotificationAppears($I, 'emails affected');
 
-        $I->wait(5);
+        $I->reloadPage();
 
         // Assert
         $this->verifyAllEmailsBelongTo($I, $newCategoryName);
+    }
+
+    /**
+     * Ensures that a notification appears after an action and contains the expected text.
+     */
+    protected function ensureNotificationAppears(AcceptanceTester $I, string $message): void
+    {
+        $I->waitForElementVisible('#flashes .alert', 10);
+        $I->see($message, '#flashes .alert');
     }
 
     public function selectAllEmails(AcceptanceTester $I): void
     {
         $I->waitForElementClickable(EmailsPage::$SELECT_ALL_CHECKBOX);
         $I->click(EmailsPage::$SELECT_ALL_CHECKBOX);
-        $I->wait(2);
         $I->seeCheckboxIsChecked(EmailsPage::$SELECT_ALL_CHECKBOX);
     }
 
@@ -55,17 +63,18 @@ class EmailManagementCest
     {
         $I->waitForElementClickable(EmailsPage::$SELECTED_ACTIONS_DROPDOWN);
         $I->click(EmailsPage::$SELECTED_ACTIONS_DROPDOWN);
-        $I->wait(2);
         $I->waitForElementClickable(EmailsPage::$CHANGE_CATEGORY_ACTION);
         $I->click(EmailsPage::$CHANGE_CATEGORY_ACTION);
-        $I->wait(2);
     }
 
     protected function verifyAllEmailsBelongTo(AcceptanceTester $I, string $firstCategoryName): void
     {
+        $I->waitForElementVisible('span.label-category');
         $categories = $I->grabMultiple('span.label-category');
         for ($i = 1; $i <= count($categories); ++$i) {
-            $I->see($firstCategoryName, '//*[@id="app-content"]/div/div[2]/div[2]/div[1]/table/tbody/tr['.$i.']/td[3]/div');
+            $xpath = '//*[@id="app-content"]/div/div[2]/div[2]/div[1]/table/tbody/tr['.$i.']/td[3]/div';
+            $I->waitForElementVisible($xpath);
+            $I->see($firstCategoryName, $xpath);
         }
     }
 }

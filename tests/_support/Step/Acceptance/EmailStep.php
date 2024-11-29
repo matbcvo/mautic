@@ -36,18 +36,14 @@ class EmailStep extends \AcceptanceTester
         $I->waitForElementClickable(EmailsPage::$NEW_CATEGORY_DROPDOWN);
         $I->click(EmailsPage::$NEW_CATEGORY_DROPDOWN);
 
-        $I->wait(2);
-
         $I->waitForElementVisible(EmailsPage::$NEW_CATEGORY_OPTION);
         $newCategoryName = $I->grabTextFrom(EmailsPage::$NEW_CATEGORY_OPTION);
-        $I->click(EmailsPage::$NEW_CATEGORY_OPTION);
 
-        $I->wait(2);
+        $I->waitForElementClickable(EmailsPage::$NEW_CATEGORY_OPTION);
+        $I->click(EmailsPage::$NEW_CATEGORY_OPTION);
 
         $I->waitForElementClickable(EmailsPage::$SAVE_BUTTON);
         $I->click(EmailsPage::$SAVE_BUTTON);
-
-        $I->wait(2);
 
         return $newCategoryName;
     }
