@@ -35,19 +35,29 @@ class EmailManagementCest
         $this->selectChangeCategoryAction($I);
         $newCategoryName = $email->changeEmailCategory();
 
+        $this->ensureNotificationAppears($I, 'emails affected');
+
         $I->reloadPage();
 
-        $I->wait(5);
+        $I->wait(5); // Wait for the page to load
 
         // Assert
         $this->verifyAllEmailsBelongTo($I, $newCategoryName);
+    }
+
+    /**
+     * Ensures that a notification appears after an action and contains the expected text.
+     */
+    protected function ensureNotificationAppears(AcceptanceTester $I, string $message): void
+    {
+        $I->waitForElementVisible('#flashes .alert', 10);
+        $I->see($message, '#flashes .alert');
     }
 
     public function selectAllEmails(AcceptanceTester $I): void
     {
         $I->waitForElementClickable(EmailsPage::$SELECT_ALL_CHECKBOX);
         $I->click(EmailsPage::$SELECT_ALL_CHECKBOX);
-        $I->wait(2);
         $I->seeCheckboxIsChecked(EmailsPage::$SELECT_ALL_CHECKBOX);
     }
 
@@ -55,10 +65,8 @@ class EmailManagementCest
     {
         $I->waitForElementClickable(EmailsPage::$SELECTED_ACTIONS_DROPDOWN);
         $I->click(EmailsPage::$SELECTED_ACTIONS_DROPDOWN);
-        $I->wait(2);
         $I->waitForElementClickable(EmailsPage::$CHANGE_CATEGORY_ACTION);
         $I->click(EmailsPage::$CHANGE_CATEGORY_ACTION);
-        $I->wait(2);
     }
 
     protected function verifyAllEmailsBelongTo(AcceptanceTester $I, string $firstCategoryName): void

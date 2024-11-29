@@ -67,6 +67,7 @@ class ContactStep extends \AcceptanceTester
     {
         $I     = $this;
         $xpath = "//*[@id='leadTable']/tbody/tr[$place]/td[1]/div/span/input";
+        $I->waitForElementClickable($xpath, 10);
         $I->checkOption($xpath);
         $I->seeCheckboxIsChecked($xpath);
     }
@@ -78,9 +79,13 @@ class ContactStep extends \AcceptanceTester
     {
         $I = $this;
         // Click the dropdown button for bulk actions
-        $I->click('//*[@id="leadTable"]/thead/tr/th[1]/div/div/button/i');
+        $xpathDropdownButton = '//*[@id="leadTable"]/thead/tr/th[1]/div/div/button/i';
+        $I->waitForElementClickable($xpathDropdownButton, 10);
+        $I->click($xpathDropdownButton);
         // Select the desired option from the dropdown menu
-        $I->click("//*[@id='leadTable']/thead/tr/th[1]/div/div/ul/li[$option]/a/span");
+        $xpathOption = "//*[@id='leadTable']/thead/tr/th[1]/div/div/ul/li[$option]/a/span";
+        $I->waitForElementClickable($xpathOption, 10);
+        $I->click($xpathOption);
     }
 
     /**
