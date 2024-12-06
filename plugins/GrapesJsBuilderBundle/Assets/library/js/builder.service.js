@@ -298,7 +298,7 @@ export default class BuilderService {
       },
       storageManager: false,
       assetManager: this.getAssetManagerConf(),
-      plugins: [grapesjsmjml, grapesjspostcss, grapesjsmautic, 'gjs-plugin-ckeditor5', ...BuilderService.getPluginNames('email-mjml')],
+      plugins: [grapesjsmjml, grapesjspostcss, grapesjstuiimageeditor, grapesjsmautic, 'gjs-plugin-ckeditor5', ...BuilderService.getPluginNames('email-mjml')],
       pluginsOpts: {
         [grapesjsmjml]: {
           hideSelector: false,
@@ -387,7 +387,7 @@ export default class BuilderService {
       },
       storageManager: false,
       assetManager: this.getAssetManagerConf(),
-      plugins: [grapesjsnewsletter, grapesjspostcss, grapesjsmautic, 'gjs-plugin-ckeditor5', ...BuilderService.getPluginNames('email-html')],
+      plugins: [grapesjsnewsletter, grapesjspostcss, grapesjstuiimageeditor, grapesjsmautic, 'gjs-plugin-ckeditor5', ...BuilderService.getPluginNames('email-html')],
       pluginsOpts: {
         grapesjsnewsletter: {
           useCustomTheme: false,
