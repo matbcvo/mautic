@@ -144,6 +144,9 @@ jobs:
     - name: Set TEST_TYPE to e2e
       run: echo "TEST_TYPE=e2e" >> $GITHUB_ENV
 
+    - name: env check
+      run: ddev exec php bin/console debug:container --env-var=TEST_TYPE
+
     - name: Run E2E tests
       run: ddev exec bin/codecept run acceptance
 
