@@ -145,6 +145,9 @@ jobs:
       run: echo "TEST_TYPE=e2e" >> $GITHUB_ENV
 
     - name: Run E2E tests
+      run: ddev exec bin/console debug:dotenv  
+
+    - name: Run E2E tests
       run: ddev exec bin/codecept run acceptance
 
     - name: Upload test artifacts
