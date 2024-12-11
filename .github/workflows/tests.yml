@@ -139,13 +139,10 @@ jobs:
       uses: ddev/github-action-setup-ddev@v1
 
     - name: Set up environment variables for test mode
-      run: echo -e "APP_ENV=test\nAPP_DEBUG=1\nTEST_TYPE=e2e" > .env.local
+      run: echo -e "APP_ENV=test\nAPP_DEBUG=1" > .env.local
 
-    - name: env check
-      run: ddev exec php bin/console debug:container --env-var=TEST_TYPE
-
-    - name: env check
-      run: ddev exec env | grep TEST_TYPE
+    - name: Set TEST_TYPE=e2e
+      run: echo -e "TEST_TYPE=e2e" >> .env.test.local
 
     - name: Run E2E tests
       run: ddev exec bin/codecept run acceptance
