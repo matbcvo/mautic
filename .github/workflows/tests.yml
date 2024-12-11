@@ -139,7 +139,7 @@ jobs:
       uses: ddev/github-action-setup-ddev@v1
 
     - name: Set up environment variables for test mode
-      run: echo -e "APP_ENV=test\nAPP_DEBUG=1" > .env.local
+      run: echo -e "APP_ENV=test\nAPP_DEBUG=1\nTEST_TYPE=e2e" > .env.local
 
     - name: Set TEST_TYPE to e2e
       run: echo "TEST_TYPE=e2e" >> $GITHUB_ENV
