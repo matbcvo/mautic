@@ -138,11 +138,6 @@ jobs:
     - name: Setup DDEV
       uses: ddev/github-action-setup-ddev@v1
 
-    - name: Set SYMFONY_ENV to test
-      run: |
-        echo "SYMFONY_ENV=test" >> $GITHUB_ENV
-        echo "MAUTIC_ENV=test" >> $GITHUB_ENV
-
     - name: Set up environment variables for test mode
       run: echo -e "APP_ENV=test\nAPP_DEBUG=1" > .env.local
 
