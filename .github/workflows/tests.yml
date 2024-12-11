@@ -144,7 +144,7 @@ jobs:
     - name: Set TEST_TYPE=e2e
       run: |
         echo "TEST_TYPE=e2e" >> $GITHUB_ENV
-        echo -e "\nTEST_TYPE=e2e" >> .env.local
+        echo -e "\nTEST_TYPE=e2e" >> .env.test.local
 
     - name: Run E2E tests
       run: ddev exec bin/console debug:dotenv  
