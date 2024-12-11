@@ -142,9 +142,7 @@ jobs:
       run: echo -e "APP_ENV=test\nAPP_DEBUG=1" > .env.local
 
     - name: Set TEST_TYPE=e2e
-      run: echo -e "\nTEST_TYPE=e2e" >> .env.test.local
-
-
+      run: echo "TEST_TYPE=e2e" >> $GITHUB_ENV
 
     - name: Run E2E tests
       run: ddev exec bin/codecept run acceptance
