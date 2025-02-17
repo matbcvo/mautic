@@ -1,0 +1,24 @@
+{
+	"image": "mcr.microsoft.com/devcontainers/universal:2",
+	"features": {
+	  "ghcr.io/ddev/ddev/install-ddev:latest": {}
+	},
+	"portsAttributes": {
+	  "3306": {
+		"label": "database"
+	  },
+	  "8025": {
+		"label": "mailhog"
+	  },
+	  "8036": {
+		"label": "phpmyadmin"
+	  },
+	  "8080": {
+		"label": "web http"
+	  },
+	  "8443": {
+		"label": "web https"
+	  },
+	},
+	"postCreateCommand": "chmod +x .devcontainer/setup_project.sh && .devcontainer/setup_project.sh"
+  }
