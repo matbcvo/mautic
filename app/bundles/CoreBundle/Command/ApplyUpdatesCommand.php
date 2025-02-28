@@ -89,6 +89,16 @@ EOT
         }
 
         try {
+            if (!empty($options['finish'])) {
+                return $this->continueUpgrade($input, $output, $progressBar);
+
+                $output->writeln(
+                    "\n\n<warning>".$this->translator->trans('mautic.core.command.update.finalize_instructions').'</warning>'
+                );
+
+                exit($returnCode);
+            }
+            
             if (empty($options['finish'])) {
                 $returnCode = $this->startUpgrade($input, $output, $progressBar);
 
@@ -101,16 +111,6 @@ EOT
                 // );
 
                 // Must hard exit here to prevent Symfony from trying to use the kernel while in the same PHP process
-                exit($returnCode);
-            }
-
-            if (!empty($options['finish'])) {
-                return $this->continueUpgrade($input, $output, $progressBar);
-
-                $output->writeln(
-                    "\n\n<warning>".$this->translator->trans('mautic.core.command.update.finalize_instructions').'</warning>'
-                );
-
                 exit($returnCode);
             }
 
