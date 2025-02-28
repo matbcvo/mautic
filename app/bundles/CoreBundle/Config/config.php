@@ -781,6 +781,7 @@ return [
                     'translator',
                     'mautic.helper.update',
                     'mautic.helper.paths',
+                    'mautic.helper.cache',
                 ],
                 'tag' => 'mautic.update_step',
             ],
