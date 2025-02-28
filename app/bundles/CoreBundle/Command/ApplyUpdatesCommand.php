@@ -89,7 +89,7 @@ EOT
         }
 
         try {
-            if (!empty($options['finish'])) {
+            if ($input->getOption('continue')) {
                 return $this->continueUpgrade($input, $output, $progressBar);
 
                 $output->writeln(
