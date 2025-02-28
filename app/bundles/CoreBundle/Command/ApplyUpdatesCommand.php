@@ -90,7 +90,7 @@ EOT
 
         try {
             if ($input->getOption('continue')) {
-                return $this->continueUpgrade($input, $output, $progressBar);
+                $returnCode = $this->continueUpgrade($input, $output, $progressBar);
 
                 $output->writeln(
                     "\n\n<warning>".$this->translator->trans('mautic.core.command.update.finalize_instructions').'</warning>'
