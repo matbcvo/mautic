@@ -42,6 +42,10 @@ class ApplyUpdatesCommand extends Command
                         'p', InputOption::VALUE_OPTIONAL, 'Optional full path to the update package to apply.'
                     ),
                     new InputOption(
+                        'continue', null, InputOption::VALUE_NONE,
+                        'Continues the upgrade process.'
+                    ),
+                    new InputOption(
                         'finish', null, InputOption::VALUE_NONE,
                         'Finalize the upgrade.'
                     ),
@@ -89,10 +93,24 @@ EOT
                 $returnCode = $this->startUpgrade($input, $output, $progressBar);
 
                 $output->writeln(
+                    "\n\n<warning>".'use --continue to continue the upgrade process</warning>'
+                );
+
+                // $output->writeln(
+                //     "\n\n<warning>".$this->translator->trans('mautic.core.command.update.finalize_instructions').'</warning>'
+                // );
+
+                // Must hard exit here to prevent Symfony from trying to use the kernel while in the same PHP process
+                exit($returnCode);
+            }
+
+            if (!empty($options['finish'])) {
+                return $this->continueUpgrade($input, $output, $progressBar);
+
+                $output->writeln(
                     "\n\n<warning>".$this->translator->trans('mautic.core.command.update.finalize_instructions').'</warning>'
                 );
 
-                // Must hard exit here to prevent Symfony from trying to use the kernel while in the same PHP process
                 exit($returnCode);
             }
 
@@ -122,6 +140,18 @@ EOT
         }
 
         foreach ($this->stepProvider->getInitialSteps() as $step) {
+            $step->execute($progressBar, $input, $output);
+        }
+
+        return 0;
+    }
+
+    /**
+     * @throws UpdateFailedException
+     */
+    private function continueUpgrade(InputInterface $input, OutputInterface $output, ProgressBar $progressBar): int
+    {
+        foreach ($this->stepProvider->getMidSteps() as $step) {
             $step->execute($progressBar, $input, $output);
         }
 
