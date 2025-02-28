@@ -1,61 +1,19 @@
-name: Test Upgrade from 5.0.0 to 6.0.0-beta
+name: Test Upgrade from PR to 6.0.0-alpha
 
 on:
   pull_request:
     branches:
-      - 6.x
+      - 5.2
 
 permissions:
   contents: read
   actions: write
 
 jobs:
-  build-package:
-    name: Build Update Package
+  test-update:
+    name: Test Update
     runs-on: ubuntu-latest
-    outputs:
-      update-package: ${{ steps.build.outputs.update-package }}
-
-    steps:
-    - uses: actions/checkout@v4
-      with:
-        ref: ${{ github.head_ref }}
-        fetch-depth: 0
-
-    - name: Setup PHP
-      uses: shivammathur/setup-php@v2
-      with:
-        php-version: 8.1
-        extensions: mbstring, xml, ctype, iconv, intl, pdo_sqlite, mysql, pdo_mysql
-
-    - name: Install dependencies
-      run: |
-        composer validate
-        composer install --no-dev --no-scripts --optimize-autoloader
-
-    - name: Build update package
-      id: build
-      run: |
-        php build/package_devhead.php
-        mv build/packages/mautic-head-update.zip build/packages/6.0.0-beta-update.zip
-        echo "update-package=6.0.0-beta-update.zip" >> $GITHUB_OUTPUT
-
-    - name: Upload update package artifact
-      uses: actions/upload-artifact@v4
-      with:
-        name: 6.0.0-beta-update.zip
-        path: ./build/packages/6.0.0-beta-update.zip
-
-    - name: Verify package exists
-      run: |
-        ls -la ./build/packages/
-        test -f ./build/packages/6.0.0-beta-update.zip || exit 1
-
-  test-upgrade:
-    name: Test Upgrade from 5.0.0
-    needs: build-package
-    runs-on: ubuntu-latest
-
+    
     services:
       mysql:
         image: mysql:5.7
@@ -68,6 +26,8 @@ jobs:
 
     steps:
     - uses: actions/checkout@v4
+      with:
+        ref: ${{ github.head_ref }}
 
     - name: Setup PHP
       uses: shivammathur/setup-php@v2
@@ -75,29 +35,33 @@ jobs:
         php-version: 8.1
         extensions: mbstring, xml, ctype, iconv, intl, pdo_sqlite, mysql, pdo_mysql
 
-    - name: Install Mautic 5.0.0
-      env:
-        DB_PORT: ${{ job.services.mysql.ports[3306] }}
+    - name: Install dependencies
       run: |
-        curl -sSL https://github.com/mautic/mautic/releases/download/5.0.0/5.0.0.zip -o 5.0.0.zip
-        unzip -q 5.0.0.zip -d ./mautic-testing
-        mkdir -p ./mautic-testing/var/logs
-        cp ./.github/ci-files/local.php ./mautic-testing/config/local.php
-        cd ./mautic-testing
-        php bin/console mautic:install --force http://localhost
+        composer validate
+        composer install --prefer-dist --no-progress --no-suggest
 
-    - name: Download update package
-      uses: actions/download-artifact@v4
-      with:
-        name: 6.0.0-beta-update.zip
-        path: ./mautic-testing
+    - name: Prepare testing environment
+      run: |
+        cp .github/ci-files/local.php config/local.php
 
-    - name: Apply update
+    - name: Install from PR code
       env:
         DB_PORT: ${{ job.services.mysql.ports[3306] }}
       working-directory: ./mautic-testing
       run: |
-        php bin/console mautic:update:apply --force --update-package=6.0.0-beta-update.zip
+        php bin/console mautic:install --force http://localhost
+
+    - name: Download official 6.0.0-alpha update
+      working-directory: ./mautic-testing
+      run: |
+        curl -sSOL https://github.com/mautic/mautic/releases/download/6.0.0-alpha/6.0.0-alpha-update.zip
+
+    - name: Apply official update
+      env:
+        DB_PORT: ${{ job.services.mysql.ports[3306] }}
+      working-directory: ./mautic-testing
+      run: |
+        php bin/console mautic:update:apply --force --update-package=6.0.0-alpha-update.zip
         php bin/console mautic:update:apply --finish
 
     - name: Store upgrade logs
