@@ -47,19 +47,16 @@ jobs:
     - name: Install from PR code
       env:
         DB_PORT: ${{ job.services.mysql.ports[3306] }}
-      working-directory: ./mautic-testing
       run: |
         php bin/console mautic:install --force http://localhost
 
     - name: Download official 6.0.0-alpha update
-      working-directory: ./mautic-testing
       run: |
         curl -sSOL https://github.com/mautic/mautic/releases/download/6.0.0-alpha/6.0.0-alpha-update.zip
 
     - name: Apply official update
       env:
         DB_PORT: ${{ job.services.mysql.ports[3306] }}
-      working-directory: ./mautic-testing
       run: |
         php bin/console mautic:update:apply --force --update-package=6.0.0-alpha-update.zip
         php bin/console mautic:update:apply --finish
