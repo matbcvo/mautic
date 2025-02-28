@@ -66,6 +66,8 @@ final class InstallNewFilesStep implements StepInterface
 
         $zipper->close();
         @unlink($zipFile);
+
+        $output->writeln("InstallnewFilesStep done");
     }
 
     /**

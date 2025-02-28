@@ -89,6 +89,7 @@ EOT
         }
 
         try {
+            // 1. start upgrade -> 2. continue upgrade -> 3. finish upgrade
             if ($input->getOption('continue')) {
                 $returnCode = $this->continueUpgrade($input, $output, $progressBar);
 
@@ -105,10 +106,6 @@ EOT
                 $output->writeln(
                     "\n\n<warning>".'use --continue to continue the upgrade process</warning>'
                 );
-
-                // $output->writeln(
-                //     "\n\n<warning>".$this->translator->trans('mautic.core.command.update.finalize_instructions').'</warning>'
-                // );
 
                 // Must hard exit here to prevent Symfony from trying to use the kernel while in the same PHP process
                 exit($returnCode);
@@ -141,6 +138,7 @@ EOT
 
         foreach ($this->stepProvider->getInitialSteps() as $step) {
             $step->execute($progressBar, $input, $output);
+            $output->writeln("startUpgrade step order:".$step->getOrder());
         }
 
         return 0;
@@ -153,6 +151,7 @@ EOT
     {
         foreach ($this->stepProvider->getMidSteps() as $step) {
             $step->execute($progressBar, $input, $output);
+            $output->writeln("continueUpgrade step order:".$step->getOrder());
         }
 
         return 0;
