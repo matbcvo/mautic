@@ -19,7 +19,7 @@ mkdir(__DIR__.'/packaging');
 
 // Copy working files to packaging space
 echo "Copying files\n";
-system("rsync -az --exclude-from 'excludefiles.txt' ../ packaging > /dev/null");
+system("rsync -az --exclude-from 'exclude_files.txt' ../ packaging > /dev/null");
 
 // Generate the bootstrap.php.cache file
 system(__DIR__.'/packaging/vendor/sensio/distribution-bundle/Resources/bin/build_bootstrap.php', $result);
