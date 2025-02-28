@@ -51,7 +51,7 @@ class StepProvider
      */
     public function getMidSteps(): array
     {
-        return $this->orderSteps($this->finalSteps);
+        return $this->orderSteps($this->midSteps);
     }
 
     /**
