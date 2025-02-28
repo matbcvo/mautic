@@ -3,6 +3,7 @@
 namespace Mautic\CoreBundle\Update\Step;
 
 use Mautic\CoreBundle\Exception\UpdateFailedException;
+use Mautic\CoreBundle\Helper\CacheHelper;
 use Mautic\CoreBundle\Helper\PathsHelper;
 use Mautic\CoreBundle\Helper\UpdateHelper;
 use Symfony\Component\Console\Helper\ProgressBar;
@@ -19,7 +20,8 @@ final class InstallNewFilesStep implements StepInterface
     public function __construct(
         private TranslatorInterface $translator,
         private UpdateHelper $updateHelper,
-        private PathsHelper $pathsHelper
+        private PathsHelper $pathsHelper,
+        private CacheHelper $cacheHelper,
     ) {
     }
 
@@ -66,6 +68,9 @@ final class InstallNewFilesStep implements StepInterface
 
         $zipper->close();
         @unlink($zipFile);
+
+        $this->cacheHelper->nukeCache();
+        $this->cacheHelper->clearSymfonyCache();
 
         $output->writeln("InstallnewFilesStep done");
     }
