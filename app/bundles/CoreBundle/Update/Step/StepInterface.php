@@ -10,6 +10,8 @@ interface StepInterface
 {
     public function getOrder(): int;
 
+    public function shouldExecuteInMidStage(): bool;
+
     public function shouldExecuteInFinalStage(): bool;
 
     public function execute(ProgressBar $progressBar, InputInterface $input, OutputInterface $output): void;

@@ -14,12 +14,23 @@ class StepProvider
     /**
      * @var StepInterface[]
      */
+    private array $midSteps = [];
+
+    /**
+     * @var StepInterface[]
+     */
     private array $finalSteps = [];
 
     public function addStep(StepInterface $step): void
     {
         if ($step->shouldExecuteInFinalStage()) {
             $this->finalSteps[] = $step;
+
+            return;
+        }
+
+        if ($step->shouldExecuteInMidStage()) {
+            $this->midSteps[] = $step;
 
             return;
         }
@@ -33,6 +44,14 @@ class StepProvider
     public function getInitialSteps(): array
     {
         return $this->orderSteps($this->initialSteps);
+    }
+
+    /**
+     * @return StepInterface[]
+     */
+    public function getMidSteps(): array
+    {
+        return $this->orderSteps($this->finalSteps);
     }
 
     /**

@@ -28,6 +28,11 @@ final class InstallNewFilesStep implements StepInterface
         return 10;
     }
 
+    public function shouldExecuteInMidStage(): bool
+    {
+        return false;
+    }
+
     public function shouldExecuteInFinalStage(): bool
     {
         return false;
