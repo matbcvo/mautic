@@ -53,17 +53,28 @@ jobs:
     - name: Download official 6.0.0-alpha update
       run: |
         curl -sSOL https://github.com/mautic/mautic/releases/download/6.0.0-alpha/6.0.0-alpha-update.zip
+  
+    - name: Modify update package with PR's CoreBundle/Update files
+      run: |
+        # Extract the official update zip
+        unzip 6.0.0-alpha-update.zip -d mautic-update
+  
+        # Copy PR's CoreBundle/Update files into the extracted directory
+        cp -r app/bundles/CoreBundle/Update mautic-update/app/bundles/CoreBundle/
 
-    - name: Apply official update
+        cp app/bundles/CoreBundle/Command/ApplyUpdatesCommand.php mautic-update/app/bundles/CoreBundle/Command/ApplyUpdatesCommand.php
+  
+        # Re-zip the modified update package
+        cd mautic-update && zip -r ../6.0.0-alpha-update-modified.zip ./*
+        cd ..
+  
+        # Replace original zip with modified one
+        mv 6.0.0-alpha-update-modified.zip 6.0.0-alpha-update.zip
+  
+    - name: Apply modified update
       env:
         DB_PORT: ${{ job.services.mysql.ports[3306] }}
       run: |
         php bin/console mautic:update:apply --force --update-package=6.0.0-alpha-update.zip
-        php bin/console mautic:update:apply --finish
-
-    - name: Store upgrade logs
-      if: ${{ always() }}
-      uses: actions/upload-artifact@v4
-      with:
-        name: upgrade-logs
-        path: ./mautic-testing/var/logs/*
+        php bin/console cache:clear
+        php bin/console mautic:update:apply --force --continue
