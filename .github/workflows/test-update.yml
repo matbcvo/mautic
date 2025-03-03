@@ -1,0 +1,61 @@
+name: Test Upgrade from PR to 6.0.0-alpha
+
+on:
+  pull_request:
+    branches:
+      - 5.2
+
+permissions:
+  contents: read
+  actions: write
+
+jobs:
+  test-update:
+    name: Test Update
+    runs-on: ubuntu-latest
+    
+    services:
+      mysql:
+        image: mysql:5.7
+        env:
+          MYSQL_ALLOW_EMPTY_PASSWORD: yes
+          MYSQL_DATABASE: mautictest
+        ports:
+          - 3306
+        options: --health-cmd="mysqladmin ping" --health-interval=10s --health-timeout=5s --health-retries=3
+
+    steps:
+    - uses: actions/checkout@v4
+      with:
+        ref: ${{ github.head_ref }}
+
+    - name: Setup PHP
+      uses: shivammathur/setup-php@v2
+      with:
+        php-version: 8.1
+        extensions: mbstring, xml, ctype, iconv, intl, pdo_sqlite, mysql, pdo_mysql
+
+    - name: Install dependencies
+      run: |
+        composer validate
+        composer install --prefer-dist --no-progress --no-suggest
+
+    - name: Prepare testing environment
+      run: |
+        cp .github/ci-files/local.php config/local.php
+
+    - name: Install from PR code
+      env:
+        DB_PORT: ${{ job.services.mysql.ports[3306] }}
+      run: |
+        php bin/console mautic:install --force http://localhost
+
+    - name: Download official 6.0.0-alpha update
+      run: |
+        curl -sSOL https://github.com/mautic/mautic/releases/download/6.0.0-alpha/6.0.0-alpha-update.zip
+  
+    - name: Apply update
+      env:
+        DB_PORT: ${{ job.services.mysql.ports[3306] }}
+      run: |
+        php upgrade.php
