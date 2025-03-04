@@ -78,3 +78,15 @@ jobs:
         php bin/console mautic:update:apply --force --update-package=6.0.0-alpha-update.zip
         php bin/console cache:clear
         php bin/console mautic:update:apply --continue
+
+    - name: Delete cache
+      env:
+        DB_PORT: ${{ job.services.mysql.ports[3306] }}
+      run: |
+        rm -rf var/cache/prod
+    
+    - name: Apply modified update
+      env:
+        DB_PORT: ${{ job.services.mysql.ports[3306] }}
+      run: |
+        php bin/console mautic:update:apply --continue
