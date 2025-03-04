@@ -62,21 +62,6 @@ final class InstallNewFilesStep implements StepInterface
         $progressBar->setMessage($this->translator->trans('mautic.core.update.step.extracting.package'));
         $progressBar->advance();
 
-        // Extract vendor files first
-        $vendorEntries = [];
-        $otherEntries = [];
-        for ($i = 0; $i < $zipper->numFiles; $i++) {
-            $entryName = $zipper->getNameIndex($i);
-            if (strpos($entryName, 'vendor/') === 0) {
-                $vendorEntries[] = $entryName;
-            } else {
-                $otherEntries[] = $entryName;
-            }
-        }
-
-        // Order entries: vendor first, others after
-        $orderedEntries = array_merge($otherEntries, $vendorEntries);
-
         if (!$zipper->extractTo($this->pathsHelper->getRootPath(), $orderedEntries)) {
             throw new UpdateFailedException($this->translator->trans('mautic.core.update.error', ['%error%' => $this->translator->trans('mautic.core.update.error_extracting_package')]));
         }
