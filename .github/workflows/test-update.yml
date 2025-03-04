@@ -82,7 +82,11 @@ jobs:
       env:
         DB_PORT: ${{ job.services.mysql.ports[3306] }}
       run: |
-        cat vendor/symfony/cache/Adapter/DoctrineAdapter.php
+        if [ -f vendor/symfony/cache/Adapter/DoctrineAdapter.php ]; then
+          echo "DoctrineAdapter.php exists."
+        else
+          echo "DoctrineAdapter.php does not exist."
+        fi || true
 
     - name: Apply modified update
       env:
