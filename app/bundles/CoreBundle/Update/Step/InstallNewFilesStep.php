@@ -75,7 +75,7 @@ final class InstallNewFilesStep implements StepInterface
         }
 
         // Order entries: vendor first, others after
-        $orderedEntries = array_merge($vendorEntries, $otherEntries);
+        $orderedEntries = array_merge($otherEntries, $vendorEntries);
 
         if (!$zipper->extractTo($this->pathsHelper->getRootPath(), $orderedEntries)) {
             throw new UpdateFailedException($this->translator->trans('mautic.core.update.error', ['%error%' => $this->translator->trans('mautic.core.update.error_extracting_package')]));
