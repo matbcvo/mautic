@@ -59,11 +59,11 @@ jobs:
         # Extract the official update zip
         unzip 6.0.0-alpha-update.zip -d mautic-update
 
-        existing=$(cat deleted_files.txt | jq -c .)
+        existing=$(cat mautic-update/deleted_files.txt | jq -c .)
         updated=$(echo $existing | jq '. + ["vendor/symfony/cache/Adapter/DoctrineAdapter.php"]')
-        echo $updated > deleted_files.txt
+        echo $updated > mautic-update/deleted_files.txt
 
-        cat deleted_files.txt | grep 'DoctrineAdapter.php'
+        cat mautic-update/deleted_files.txt | grep 'DoctrineAdapter.php'
 
         # Re-zip the modified update package
         cd mautic-update && zip -r ../6.0.0-alpha-update-modified.zip ./*
