@@ -76,4 +76,5 @@ jobs:
         DB_PORT: ${{ job.services.mysql.ports[3306] }}
       run: |
         php bin/console mautic:update:apply --force --update-package=6.0.0-alpha-update.zip
-        # php bin/console mautic:update:apply --force --continue
+        php bin/console cache:clear
+        php bin/console mautic:update:apply --continue
