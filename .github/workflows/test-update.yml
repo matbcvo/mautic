@@ -58,12 +58,9 @@ jobs:
       run: |
         # Extract the official update zip
         unzip 6.0.0-alpha-update.zip -d mautic-update
-  
-        # Copy PR's CoreBundle/Update files into the extracted directory
-        cp -r app/bundles/CoreBundle/Update mautic-update/app/bundles/CoreBundle/
 
-        cp app/bundles/CoreBundle/Command/ApplyUpdatesCommand.php mautic-update/app/bundles/CoreBundle/Command/ApplyUpdatesCommand.php
-  
+        rm -rf mautic-update/vendor/symfony/cache/Adapter/DoctrineAdapter.php
+
         # Re-zip the modified update package
         cd mautic-update && zip -r ../6.0.0-alpha-update-modified.zip ./*
         cd ..
