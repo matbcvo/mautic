@@ -59,7 +59,9 @@ jobs:
         # Extract the official update zip
         unzip 6.0.0-alpha-update.zip -d mautic-update
 
-        echo '["vendor/symfony/cache/Adapter/DoctrineAdapter.php"]' | php -r 'file_put_contents("deleted_files.txt", json_encode(array_unique(array_merge(json_decode(file_get_contents("deleted_files.txt") ?: "[]"), json_decode(stream_get_contents(STDIN))))));'
+        existing=$(cat deleted_files.txt | jq -c .)
+        updated=$(echo $existing | jq '. + ["vendor/symfony/cache/Adapter/DoctrineAdapter.php"]')
+        echo $updated > deleted_files.txt
 
         cat deleted_files.txt | grep 'DoctrineAdapter.php'
 
