@@ -84,9 +84,6 @@ final class InstallNewFilesStep implements StepInterface
         $zipper->close();
         @unlink($zipFile);
 
-        $this->cacheHelper->nukeCache();
-        $this->cacheHelper->clearSymfonyCache();
-
         $output->writeln("InstallnewFilesStep done");
     }
 
