@@ -25,11 +25,6 @@ final class FinalizeUpdateStep implements StepInterface
         return 60;
     }
 
-    public function shouldExecuteInMidStage(): bool
-    {
-        return false;
-    }
-
     public function shouldExecuteInFinalStage(): bool
     {
         return true;

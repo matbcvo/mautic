@@ -26,11 +26,6 @@ final class RemoveDeletedFilesStep implements StepInterface
         return 20;
     }
 
-    public function shouldExecuteInMidStage(): bool
-    {
-        return true;
-    }
-
     public function shouldExecuteInFinalStage(): bool
     {
         return false;

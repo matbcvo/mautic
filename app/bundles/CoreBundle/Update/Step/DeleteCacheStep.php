@@ -21,11 +21,6 @@ final class DeleteCacheStep implements StepInterface
         return 30;
     }
 
-    public function shouldExecuteInMidStage(): bool
-    {
-        return true;
-    }
-
     public function shouldExecuteInFinalStage(): bool
     {
         return false;

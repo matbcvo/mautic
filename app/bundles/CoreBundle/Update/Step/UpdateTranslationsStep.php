@@ -23,11 +23,6 @@ final class UpdateTranslationsStep implements StepInterface
         return 40;
     }
 
-    public function shouldExecuteInMidStage(): bool
-    {
-        return true;
-    }
-
     public function shouldExecuteInFinalStage(): bool
     {
         return true;

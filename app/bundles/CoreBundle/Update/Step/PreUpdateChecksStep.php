@@ -25,11 +25,6 @@ final class PreUpdateChecksStep implements StepInterface
         return 0;
     }
 
-    public function shouldExecuteInMidStage(): bool
-    {
-        return false;
-    }
-
     public function shouldExecuteInFinalStage(): bool
     {
         return false;
