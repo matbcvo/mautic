@@ -90,12 +90,6 @@ jobs:
           echo "DoctrineAdapter.php does not exist."
         fi || true
 
-    - name: Clear cache
-      env:
-        DB_PORT: ${{ job.services.mysql.ports[3306] }}
-      run: |
-        php bin/console cache:clear
-
     - name: Apply modified update
       env:
         DB_PORT: ${{ job.services.mysql.ports[3306] }}
