@@ -62,7 +62,7 @@ final class InstallNewFilesStep implements StepInterface
         $progressBar->setMessage($this->translator->trans('mautic.core.update.step.extracting.package'));
         $progressBar->advance();
 
-        if (!$zipper->extractTo($this->pathsHelper->getRootPath(), $orderedEntries)) {
+        if (!$zipper->extractTo($this->pathsHelper->getRootPath())) {
             throw new UpdateFailedException($this->translator->trans('mautic.core.update.error', ['%error%' => $this->translator->trans('mautic.core.update.error_extracting_package')]));
         }
 
