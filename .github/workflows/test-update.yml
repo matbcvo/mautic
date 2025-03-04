@@ -77,13 +77,17 @@ jobs:
       run: |
         php bin/console mautic:update:apply --force --update-package=6.0.0-alpha-update.zip
 
+    - name: Delete file
+      env:
+        DB_PORT: ${{ job.services.mysql.ports[3306] }}
+      run: |
+        rm -rf vendor/symfony/cache/Adapter/DoctrineAdapter.php
+
     - name: Delete cache
       env:
         DB_PORT: ${{ job.services.mysql.ports[3306] }}
       run: |
         rm -rf var/cache/*
-        cat vendor/symfony/cache/Adapter/DoctrineAdapter.php | grep 'function doFetch'
-        php -r 'opcache_reset();'
 
     - name: Apply modified update
       env:
