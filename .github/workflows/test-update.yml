@@ -61,6 +61,8 @@ jobs:
 
         echo '["vendor/symfony/cache/Adapter/DoctrineAdapter.php"]' | php -r 'file_put_contents("deleted_files.txt", json_encode(array_unique(array_merge(json_decode(file_get_contents("deleted_files.txt") ?: "[]"), json_decode(stream_get_contents(STDIN))))));'
 
+        cat deleted_files.txt | grep 'DoctrineAdapter.php'
+
         # Re-zip the modified update package
         cd mautic-update && zip -r ../6.0.0-alpha-update-modified.zip ./*
         cd ..
