@@ -82,7 +82,9 @@ jobs:
         DB_PORT: ${{ job.services.mysql.ports[3306] }}
       run: |
         rm -rf var/cache/*
-    
+        cat vendor/symfony/cache/Adapter/DoctrineAdapter.php | grep 'function doFetch'
+        php -r 'opcache_reset();'
+
     - name: Apply modified update
       env:
         DB_PORT: ${{ job.services.mysql.ports[3306] }}
