@@ -65,7 +65,6 @@ jobs:
 
         cat mautic-update/deleted_files.txt | grep 'DoctrineAdapter.php'
 
-        cp fix-update/config.php mautic-update/app/bundles/CoreBundle/Config/config.php
         cp fix-update/FinalizeUpdateStep.php mautic-update/app/bundles/CoreBundle/Update/Step/FinalizeUpdateStep.php
 
         # Re-zip the modified update package
