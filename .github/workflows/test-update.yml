@@ -81,7 +81,7 @@ jobs:
       env:
         DB_PORT: ${{ job.services.mysql.ports[3306] }}
       run: |
-        rm -rf var/cache/prod
+        rm -rf var/cache/*
     
     - name: Apply modified update
       env:
