@@ -14,13 +14,14 @@ jobs:
   release:
     permissions:
       contents: write  # for actions/create-release to create a release
-    name: Create draft release
+    name: Generate minimum Mautic version deletes_files.txt
     runs-on: ubuntu-latest
 
     steps:
     - uses: actions/checkout@v4
       # Our build script needs access to all previous tags, so we add fetch-depth: 0
       with:
+        ref: 6.x
         fetch-depth: 0
     
     - name: Setup PHP, with composer and extensions
@@ -41,11 +42,18 @@ jobs:
     - name: "Download and extract minimum Mautic version: ${{ env.MAUTIC_MINIMUM_VERSION }}"
       run: |
         curl -sSL https://github.com/mautic/mautic/releases/download/${{ env.MAUTIC_MINIMUM_VERSION }}/${{ env.MAUTIC_MINIMUM_VERSION }}.zip -o ${{ env.MAUTIC_MINIMUM_VERSION }}.zip
-        unzip -q ${{ env.MAUTIC_MINIMUM_VERSION }}.zip -d ./mautic-minimum-version
+        unzip -q ${{ env.MAUTIC_MINIMUM_VERSION }}.zip -d ./build/mautic-minimum-version
+        pwd
+        ls -al
 
     - name: Build release files
       run: |
         php build/package_release_test.php
+
+    - uses: actions/upload-artifact@v4
+      with:
+        name: artifact
+        path: build/artifact
 
   test-update:
     name: Test Update
@@ -91,14 +99,20 @@ jobs:
       run: |
         curl -sSOL https://github.com/mautic/mautic/releases/download/6.0.0-alpha/6.0.0-alpha-update.zip
   
+    - uses: actions/download-artifact@v4
+      with:
+        name: artifact
+        path: build/artifact
+
     - name: Modify update package
       run: |
         # Extract the official update zip
         unzip 6.0.0-alpha-update.zip -d mautic-update
 
-        existing=$(cat mautic-update/deleted_files.txt | jq -c .)
-        updated=$(echo $existing | jq '. + ["vendor/symfony/cache/Adapter/DoctrineAdapter.php"]')
-        echo $updated > mautic-update/deleted_files.txt
+        existing=$(jq -c . mautic-update/deleted_files.txt)
+        new_entries=$(jq -c . artifact/deleted_files.txt)
+        updated=$(jq -n --argjson existing "$existing" --argjson new "$new_entries" '$existing + $new')
+        echo "$updated" > mautic-update/deleted_files.txt
 
         cat mautic-update/deleted_files.txt | grep 'DoctrineAdapter.php'
 
