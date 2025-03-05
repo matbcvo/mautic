@@ -10,6 +10,43 @@ permissions:
   actions: write
 
 jobs:
+
+  release:
+    permissions:
+      contents: write  # for actions/create-release to create a release
+    name: Create draft release
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v4
+      # Our build script needs access to all previous tags, so we add fetch-depth: 0
+      with:
+        fetch-depth: 0
+    
+    - name: Setup PHP, with composer and extensions
+      uses: shivammathur/setup-php@v2
+      with:
+        php-version: 8.1
+        extensions: mbstring, xml, ctype, iconv, intl, pdo_sqlite, mysql, pdo_mysql
+
+    - name: Install dependencies
+      run: |
+        composer validate
+        composer install --prefer-dist --no-progress --no-suggest
+
+    - name: Get minimum Mautic version
+      run: |
+        echo "MAUTIC_MINIMUM_VERSION=$(jq -r '.minimum_mautic_version' app/release_metadata.json)" >> $GITHUB_ENV
+
+    - name: "Download and extract minimum Mautic version: ${{ env.MAUTIC_MINIMUM_VERSION }}"
+      run: |
+        curl -sSL https://github.com/mautic/mautic/releases/download/${{ env.MAUTIC_MINIMUM_VERSION }}/${{ env.MAUTIC_MINIMUM_VERSION }}.zip -o ${{ env.MAUTIC_MINIMUM_VERSION }}.zip
+        unzip -q ${{ env.MAUTIC_MINIMUM_VERSION }}.zip -d ./mautic-minimum-version
+
+    - name: Build release files
+      run: |
+        php build/package_release_test.php
+
   test-update:
     name: Test Update
     runs-on: ubuntu-latest
