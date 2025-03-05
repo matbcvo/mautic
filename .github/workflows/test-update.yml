@@ -1,0 +1,186 @@
+name: Test Upgrade from PR to 6.0.0-alpha
+
+on:
+  pull_request:
+    branches:
+      - 6.x
+
+permissions:
+  contents: read
+  actions: write
+
+jobs:
+
+  release:
+    permissions:
+      contents: write  # for actions/create-release to create a release
+    name: Generate minimum Mautic version deletes_files.txt
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v4
+      # Our build script needs access to all previous tags, so we add fetch-depth: 0
+      with:
+        fetch-depth: 0
+    
+    - name: Setup PHP, with composer and extensions
+      uses: shivammathur/setup-php@v2
+      with:
+        php-version: 8.1
+        extensions: mbstring, xml, ctype, iconv, intl, pdo_sqlite, mysql, pdo_mysql
+
+    - name: Install dependencies
+      run: |
+        composer validate
+        composer install --prefer-dist --no-progress --no-suggest
+
+    - name: Get minimum Mautic version
+      run: |
+        echo "MAUTIC_MINIMUM_VERSION=$(jq -r '.minimum_mautic_version' app/release_metadata.json)" >> $GITHUB_ENV
+
+    - name: "Download and extract minimum Mautic version: ${{ env.MAUTIC_MINIMUM_VERSION }}"
+      run: |
+        curl -sSL https://github.com/mautic/mautic/releases/download/${{ env.MAUTIC_MINIMUM_VERSION }}/${{ env.MAUTIC_MINIMUM_VERSION }}.zip -o ${{ env.MAUTIC_MINIMUM_VERSION }}.zip
+        unzip -q ${{ env.MAUTIC_MINIMUM_VERSION }}.zip -d ./build/mautic-minimum-version
+        pwd
+        ls -al
+
+    - name: Download and extract official 6.0.0-alpha update
+      run: |
+        curl -sSOL https://github.com/mautic/mautic/releases/download/6.0.0-alpha/6.0.0-alpha-update.zip
+        unzip 6.0.0-alpha-update.zip -d mautic-update
+
+    - name: Check mautic-update/vendor/tightenco/collect/src/Collect/Support/helpers.php
+      env:
+        DB_PORT: ${{ job.services.mysql.ports[3306] }}
+      run: |
+        if [ -f mautic-update/vendor/tightenco/collect/src/Collect/Support/helpers.php ]; then
+          echo "mautic-update/vendor/tightenco/collect/src/Collect/Support/helpers.php exists."
+        else
+          echo "mautic-update/vendor/tightenco/collect/src/Collect/Support/helpers.php does not exist."
+        fi || true
+
+    - name: Build release files
+      run: |
+        php build/package_release_test.php
+
+    - name: Check build/packaging/vendor/tightenco/collect/src/Collect/Support/helpers.php
+      env:
+        DB_PORT: ${{ job.services.mysql.ports[3306] }}
+      run: |
+        ls -al build/packaging
+        if [ -f build/packaging/vendor/tightenco/collect/src/Collect/Support/helpers.php ]; then
+          echo "build/packaging/vendor/tightenco/collect/src/Collect/Support/helpers.php exists."
+        else
+          echo "build/packaging/vendor/tightenco/collect/src/Collect/Support/helpers.php does not exist."
+        fi || true
+
+
+    - uses: actions/upload-artifact@v4
+      with:
+        name: artifact
+        path: build/artifact
+
+  test-update:
+    needs: [
+       release
+    ]
+    name: Test Update
+    runs-on: ubuntu-latest
+    
+    services:
+      mysql:
+        image: mysql:5.7
+        env:
+          MYSQL_ALLOW_EMPTY_PASSWORD: yes
+          MYSQL_DATABASE: mautictest
+        ports:
+          - 3306
+        options: --health-cmd="mysqladmin ping" --health-interval=10s --health-timeout=5s --health-retries=3
+
+    steps:
+    - uses: actions/checkout@v4
+      with:
+        ref: ${{ github.head_ref }}
+
+    - name: Setup PHP
+      uses: shivammathur/setup-php@v2
+      with:
+        php-version: 8.1
+        extensions: mbstring, xml, ctype, iconv, intl, pdo_sqlite, mysql, pdo_mysql
+
+    - name: Install dependencies
+      run: |
+        composer validate
+        composer install --prefer-dist --no-progress --no-suggest
+
+    - name: Prepare testing environment
+      run: |
+        cp .github/ci-files/local.php config/local.php
+
+    - name: Install from PR code
+      env:
+        DB_PORT: ${{ job.services.mysql.ports[3306] }}
+      run: |
+        php bin/console mautic:install --force http://localhost
+
+    - name: Download official 6.0.0-alpha update
+      run: |
+        curl -sSOL https://github.com/mautic/mautic/releases/download/6.0.0-alpha/6.0.0-alpha-update.zip
+  
+    - uses: actions/download-artifact@v4
+      with:
+        name: artifact
+        path: build/artifact
+
+    - name: Modify update package
+      run: |
+        ls -al build/artifact
+
+        # Extract the official update zip
+        unzip 6.0.0-alpha-update.zip -d mautic-update
+
+        cp build/artifact/deleted_files.txt mautic-update/deleted_files.txt
+
+        cat mautic-update/deleted_files.txt | grep 'DoctrineAdapter.php'
+
+        rm -rf mautic-update/app/bundles/CoreBundle/Update/Step/FinalizeUpdateStep.php
+        
+        wget https://raw.githubusercontent.com/mautic/mautic/refs/heads/6.x/app/bundles/CoreBundle/Update/Step/FinalizeUpdateStep.php
+        mv FinalizeUpdateStep.php mautic-update/app/bundles/CoreBundle/Update/Step/FinalizeUpdateStep.php
+
+        # Re-zip the modified update package
+        cd mautic-update && zip -r ../6.0.0-alpha-update-modified.zip ./*
+        cd ..
+  
+        # Replace original zip with modified one
+        mv 6.0.0-alpha-update-modified.zip 6.0.0-alpha-update.zip
+  
+    - name: Apply modified update
+      env:
+        DB_PORT: ${{ job.services.mysql.ports[3306] }}
+      run: |
+        php bin/console mautic:update:apply --force --update-package=6.0.0-alpha-update.zip
+
+    - name: Check DoctrineAdapter.php file
+      env:
+        DB_PORT: ${{ job.services.mysql.ports[3306] }}
+      run: |
+        if [ -f vendor/symfony/cache/Adapter/DoctrineAdapter.php ]; then
+          echo "DoctrineAdapter.php exists."
+        else
+          echo "DoctrineAdapter.php does not exist."
+        fi || true
+
+    - name: Apply modified update
+      env:
+        DB_PORT: ${{ job.services.mysql.ports[3306] }}
+      run: |
+        php bin/console mautic:update:apply --finish
+
+    - name: Store log artifacts
+      if: ${{ always() }}
+      uses: actions/upload-artifact@v4
+      with:
+        name: update-logs
+        path: ./var/logs/*
