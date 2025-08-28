@@ -9,7 +9,7 @@ class AssetApiControllerFunctionalTest extends MauticMysqlTestCase
     public function testCreateNewRemoteAsset(): void
     {
         $payload = [
-            'file'            => 'https://www.w3.org/WAI/ER/tests/xhtml/testfiles/resources/pdf/dummy.pdf',
+            'file'            => 'https://raw.githubusercontent.com/mautic/mautic/7.x/tests/_data/dummy.pdf',
             'storageLocation' => 'remote',
             'title'           => 'title',
         ];
