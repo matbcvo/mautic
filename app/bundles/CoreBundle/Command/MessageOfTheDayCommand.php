@@ -65,8 +65,14 @@ final class MessageOfTheDayCommand extends Command
         $cachePath = $this->coreParametersHelper->get('motd_cache_path');
         $cacheTtl  = (int) $this->coreParametersHelper->get('motd_cache_ttl');
 
+        $output->writeln('<comment>MOTD URL: '.$url.'</comment>');
+        $output->writeln('<comment>MOTD cache path: '.$cachePath.'</comment>');
+        $output->writeln('<comment>MOTD cache ttl: '.$cacheTtl.'</comment>');
+
         if (is_file($cachePath) && time() - filemtime($cachePath) < $cacheTtl) {
             $cached = file_get_contents($cachePath);
+
+            $output->writeln('<comment>MOTD cache exists, bytes: '.strlen((string) $cached).'</comment>');
 
             if (false !== $cached) {
                 return $cached;
@@ -75,15 +81,34 @@ final class MessageOfTheDayCommand extends Command
 
         try {
             $response = $this->httpClient->request('GET', $url, [
-                'timeout' => 3,
+                'timeout' => 10,
                 'headers' => [
-                    'Accept' => 'application/json',
+                    'Accept'          => 'application/json',
+                    'Accept-Encoding' => 'identity',
                 ],
             ]);
 
-            $json = $response->getContent();
-        } catch (ExceptionInterface) {
-            throw new MessageOfTheDayException('Could not fetch motd.json');
+            $statusCode = $response->getStatusCode();
+            $headers    = $response->getHeaders(false);
+            $info       = $response->getInfo();
+            $json       = $response->getContent(false);
+
+            $output->writeln('<comment>MOTD status: '.$statusCode.'</comment>');
+            $output->writeln('<comment>MOTD headers: '.json_encode($headers).'</comment>');
+            $output->writeln('<comment>MOTD info: '.json_encode([
+                'url'            => $info['url'] ?? null,
+                'http_code'      => $info['http_code'] ?? null,
+                'redirect_count' => $info['redirect_count'] ?? null,
+                'primary_ip'     => $info['primary_ip'] ?? null,
+                'http_version'   => $info['http_version'] ?? null,
+                'content_type'   => $info['response_headers'] ?? null,
+                'error'          => $info['error'] ?? null,
+            ], JSON_UNESCAPED_SLASHES).'</comment>');
+
+            $output->writeln('<comment>MOTD body bytes: '.strlen($json).'</comment>');
+            $output->writeln('<comment>MOTD body preview: '.substr($json, 0, 200).'</comment>');
+        } catch (ExceptionInterface $e) {
+            throw new MessageOfTheDayException('Could not fetch motd.json: '.$e->getMessage());
         }
 
         if ('' === $json) {
