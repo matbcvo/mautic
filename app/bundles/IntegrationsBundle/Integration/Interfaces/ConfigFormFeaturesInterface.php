@@ -10,6 +10,8 @@ interface ConfigFormFeaturesInterface
 
     public const FEATURE_PUSH_ACTIVITY = 'push_activity';
 
+    public const FEATURE_PUSH_LEAD     = 'push_lead';
+
     /**
      * Return an array of value => label pairs for the features this integration supports.
      */
