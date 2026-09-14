@@ -133,10 +133,6 @@
     },
     {
       "type": "git",
-      "url": "https://github.com/mautic/SymfonyBridgeBundle.git"
-    },
-    {
-      "type": "git",
       "url": "https://github.com/mautic/oauth2-php"
     }
   ],
