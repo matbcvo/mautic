@@ -2,6 +2,8 @@
 
 namespace Mautic\CoreBundle\Model;
 
+use Mautic\CoreBundle\Entity\CommonEntity;
+use Mautic\CoreBundle\Entity\ResettableVariantsInterface;
 use Mautic\CoreBundle\Entity\TranslationEntityInterface;
 use Mautic\CoreBundle\Entity\VariantEntityInterface;
 
@@ -12,9 +14,9 @@ trait VariantModelTrait
     /**
      * Prepare a variant for saving.
      *
-     * @param array $resetVariantCounterMethods ['setVariantHits', 'setVariantSends', ...]
+     * @param string[] $resetVariantCounterMethods ['setVariantHits', 'setVariantSends', ...]
      */
-    protected function preVariantSaveEntity(VariantEntityInterface $entity, array $resetVariantCounterMethods = [], ?\DateTime $variantStartDate = null): bool
+    protected function preVariantSaveEntity(VariantEntityInterface&CommonEntity $entity, array $resetVariantCounterMethods = [], ?\DateTime $variantStartDate = null): bool
     {
         $isVariant = $entity->isVariant();
 
@@ -36,7 +38,7 @@ trait VariantModelTrait
             }
 
             // Reset the variant
-            if (!empty($changes) && empty($this->inConversion)) {
+            if ($changes !== [] && empty($this->inConversion)) {
                 $entity->setVariantStartDate($variantStartDate);
 
                 // Reset counters
@@ -73,7 +75,7 @@ trait VariantModelTrait
     {
         $repo = $this->getRepository();
 
-        if (method_exists($repo, 'resetVariants')) {
+        if ($repo instanceof ResettableVariantsInterface) {
             if (null == $relatedIds) {
                 $relatedIds = $entity->getRelatedEntityIds();
             }
